@@ -1,0 +1,8 @@
+# Local Netlify folder
+.netlify
+.env
+.env.local
+.tmp
+node_modules
+dist
+.next
