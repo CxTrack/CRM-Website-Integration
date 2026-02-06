@@ -8,9 +8,16 @@ export async function GET(request: Request) {
 
     if (code) {
         const supabase = createRouteHandlerClient({ cookies })
-        await supabase.auth.exchangeCodeForSession(code)
+        const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code)
+
+        if (session && !error) {
+            // Redirect to CRM with session token
+            const crmUrl = process.env.NEXT_PUBLIC_CRM_URL || 'http://localhost:5176'
+            const redirectUrl = `${crmUrl}?access_token=${session.access_token}&refresh_token=${session.refresh_token}`
+            return NextResponse.redirect(redirectUrl)
+        }
     }
 
-    // URL to redirect to after sign in process completes
-    return NextResponse.redirect(`${requestUrl.origin}/workspace`)
+    // Fallback to access page if something went wrong
+    return NextResponse.redirect(`${requestUrl.origin}/access?error=auth_failed`)
 }
